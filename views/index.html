@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ứng dụng Đặt Chỗ</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Ứng dụng Đặt Chỗ</h1>
+    
+    <div id="auth">
+        <h2>Đăng Nhập</h2>
+        <input type="text" id="username" placeholder="Tên đăng nhập">
+        <input type="password" id="password" placeholder="Mật khẩu">
+        <button onclick="login()">Đăng Nhập</button>
+        <p id="login-message"></p>
+    </div>
+
+    <div id="register">
+        <h2>Đăng Ký</h2>
+        <input type="text" id="register-username" placeholder="Tên đăng nhập">
+        <input type="password" id="register-password" placeholder="Mật khẩu">
+        <button onclick="register()">Đăng Ký</button>
+        <p id="register-message"></p>
+    </div>
+
+    <div id="services">
+        <h2>Dịch Vụ</h2>
+        <ul id="service-list"></ul>
+    </div>
+
+    <script>
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const response = await fetch('/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                localStorage.setItem('token', data.token);
+                document.getElementById('login-message').innerText = 'Đăng nhập thành công!';
+                loadServices();
+            } else {
+                document.getElementById('login-message').innerText = data.message;
+            }
+        }
+
+        async function register() {
+            const username = document.getElementById('register-username').value;
+            const password = document.getElementById('register-password').value;
+
+            const response = await fetch('/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                document.getElementById('register-message').innerText = 'Đăng ký thành công! Bạn có thể đăng nhập.';
+            } else {
+                document.getElementById('register-message').innerText = data.message;
+            }
+        }
+
+        async function loadServices() {
+            const response = await fetch('/services');
+            const services = await response.json();
+            const serviceList = document.getElementById('service-list');
+            serviceList.innerHTML = '';
+            services.forEach(service => {
+                const li = document.createElement('li');
+                li.innerText = `${service.name}: ${service.description}`;
+                serviceList.appendChild(li);
+            });
+        }
+    </script>
+</body>
+</html>
